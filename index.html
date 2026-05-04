@@ -3,110 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pontinho Pro - Mesa de Feltro</title>
+    <title>Pontinho Pro - Mesa Cassino Vertical</title>
     <style>
-        :root { --feltro: #0b4d2c; --ouro: #f1c40f; --copas: #e74c3c; --ouros: #3498db; --paus: #2ecc71; --espadas: #000; }
-        body, html { margin: 0; padding: 0; height: 100vh; background: #000; color: white; font-family: sans-serif; overflow: hidden; }
-        .mesa { position: relative; width: 100vw; height: 100vh; background: var(--feltro); display: flex; flex-direction: column; align-items: center; }
-        .header { width: 100%; display: flex; justify-content: space-between; padding: 10px; box-sizing: border-box; background: rgba(0,0,0,0.3); z-index: 10; }
-        .placar-mao { background: white; color: black; padding: 5px 15px; border-radius: 5px; font-weight: bold; border: 2px solid var(--ouro); }
-        
-        /* Monte e Lixo - Canto Inferior Esquerdo */
-        .deck-area { position: absolute; bottom: 120px; left: 15px; display: flex; flex-direction: column; gap: 8px; z-index: 5; }
-        .slot { width: 50px; height: 75px; border-radius: 5px; border: 1px solid white; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .monte { background: #2980b9; box-shadow: 0 4px #1a5276; color: white; }
-        .lixo { background: rgba(255,255,255,0.1); border-style: dashed; color: white; }
+        :root {
+            --feltro: #0b4d2c;
+            --ouro: #f1c40f;
+            /* Naipes Modernos e Coloridos */
+            --copas: #e74c3c; --ouros: #3498db; --paus: #2ecc71; --espadas: #000;
+        }
 
-        /* Sua Mão */
-        .mao-cartas { position: fixed; bottom: 0; width: 100%; height: 100px; background: rgba(255,255,255,0.9); display: flex; justify-content: center; gap: 4px; padding-top: 10px; box-shadow: 0 -5px 15px rgba(0,0,0,0.5); }
-        .carta { background: white; border-radius: 4px; border: 1px solid #000; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; color: black; position: relative; }
-        .carta-mao { width: 45px; height: 70px; cursor: pointer; transition: transform 0.2s; }
+        body, html { margin: 0; padding: 0; height: 100vh; background: #000; color: white; font-family: sans-serif; overflow: hidden; }
+
+        .sala { display: flex; flex-direction: column; height: 100vh; align-items: center; justify-content: center; position: relative; }
+
+        /* Placar Dinâmico no Topo */
+        .header-ui { position: absolute; top: 10px; width: 90%; display: flex; justify-content: space-between; z-index: 100; }
+        .msg-turno { font-weight: bold; font-style: italic; color: #aaa; font-size: 14px; }
+        .placar-mao { background: white; color: black; padding: 5px 15px; border-radius: 5px; font-weight: bold; border: 2px solid var(--ouro); }
+
+        /* A MESA OVAL (Layout Vertical com Perspectiva) */
+        .mesa-oval {
+            position: relative;
+            width: 95vw; height: 70vh;
+            background: var(--feltro);
+            border: 10px solid #222;
+            border-radius: 50% / 50%;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.8), 0 10px 30px rgba(0,0,0,0.7);
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* Áreas Individuais de Jogadores (Bot e Você) */
+        .player-block {
+            position: absolute; display: flex; flex-direction: column; align-items: center; width: 120px;
+        }
+        .pos-topo { top: -35px; }
+        .pos-esq { left: 10px; top: 40%; }
+        .pos-dir { right: 10px; top: 40%; }
+        .pos-baixo { bottom: -15px; border-color: #2ecc71; }
+
+        /* Espaço para Jogos Baixados (O "Tapete") */
+        .jogos-tapete {
+            width: 100px; height: 80px; background: rgba(0,0,0,0.1); border-radius: 10px;
+            border: 1px dashed rgba(255,255,255,0.2); margin-top: 5px;
+            display: flex; flex-wrap: wrap; gap: 2px; padding: 5px; align-content: center; justify-content: center;
+        }
+
+        .avatar { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--ouro); background: #333; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .nome { background: rgba(0,0,0,0.7); padding: 1px 8px; border-radius: 10px; font-size: 11px; margin-top: 3px; color: #ccc; }
+
+        /* Centro da Mesa: Monte, Lixo e Vira */
+        .centro-mesa { display: flex; align-items: center; gap: 25px; z-index: 50; }
+        
+        .deck-area { position: relative; width: 55px; height: 80px; cursor: pointer; }
+        .vira-coringa {
+            position: absolute; bottom: -8px; right: -12px;
+            width: 25px; height: 38px; background: white; color: black; border: 1px solid #000;
+            font-size: 9px; font-weight: bold; border-radius: 3px; transform: rotate(12deg); z-index: 1;
+        }
+        .monte-card {
+            position: relative; z-index: 2; width: 100%; height: 100%;
+            background: #2980b9; border: 2px solid white; border-radius: 5px;
+            display: flex; align-items: center; justify-content: center; font-weight: bold;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+        }
+
+        .lixo-slot {
+            width: 55px; height: 80px; border: 2px dashed rgba(255,255,255,0.3);
+            border-radius: 5px; display: flex; align-items: center; justify-content: center; cursor: pointer;
+            color: #aaa; font-weight: bold;
+        }
+
+        /* Cartas */
+        .carta { background: white; border-radius: 4px; border: 1px solid #000; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; box-shadow: 1px 1px 3px rgba(0,0,0,0.4); }
+        .mini { width: 20px; height: 30px; font-size: 9px; }
+        
+        /* Sua Mão Real - Fica fixada na base */
+        .mao-cartas { position: fixed; bottom: 0; width: 100%; height: 95px; background: rgba(255,255,255,0.9); display: flex; justify-content: center; gap: 3px; padding-top: 10px; z-index: 200; box-shadow: 0 -5px 15px rgba(0,0,0,0.4); }
+        .carta-mao { width: 42px; height: 65px; cursor: pointer; font-size: 16px; transition: transform 0.2s; }
         .selecionada { transform: translateY(-30px); border: 3px solid var(--ouro); box-shadow: 0 0 10px var(--ouro); }
-        
-        /* Naipes */
+
+        /* Cores Naipes */
         .n-♥ { color: var(--copas); } .n-♦ { color: var(--ouros); } .n-♣ { color: var(--paus); } .n-♠ { color: #000; }
-        
-        /* Mesa Central */
-        .area-jogos { position: absolute; top: 15%; width: 80%; height: 50%; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-content: center; border: 2px dashed rgba(255,255,255,0.1); border-radius: 20px; }
     </style>
 </head>
 <body>
 
-<div class="mesa">
-    <div class="header">
-        <div id="msg">SUA VEZ - COMPRE UMA CARTA</div>
-        <div class="placar-mao">MINHA MÃO: <span id="soma">0</span></div>
+<div class="sala">
+    <div class="header-ui">
+        <div class="msg-turno">TURNO: VOCÊ</div>
+        <div class="placar-mao">MINHA MÃO: <span id="soma-mao">0</span></div>
     </div>
 
-    <div class="area-jogos" onclick="baixarJogo()" title="Clique aqui para baixar o jogo selecionado">
+    <div class="mesa-oval">
+        <div class="player-block pos-topo">
+            <div class="avatar">🤖</div>
+            <div class="nome">Bot 1</div>
+            <div class="jogos-tapete" id="jogos-bot1"></div>
         </div>
 
-    <div class="deck-area">
-        <div class="slot lixo" id="lixo" onclick="comprarLixo()">LIXO</div>
-        <div class="slot monte" onclick="comprarMonte()">MONTE</div>
-    </div>
+        <div class="player-block pos-esq">
+            <div class="avatar">🤖</div>
+            <div class="nome">Bot 2</div>
+            <div class="jogos-tapete" id="jogos-bot2"></div>
+        </div>
 
-    <div class="mao-cartas" id="minha-mao"></div>
-</div>
+        <div class="centro-mesa">
+            <div class="deck-area" onclick="comprarMonte()">
+                <div class="carta mini vira-coringa n-♦"><span>K</span><span>♦</span></div>
+                <div class="monte-card">104</div>
+            </div>
+            <div class="lixo-slot" id="lixo" onclick="comprarLixo()">LIXO</div>
+        </div>
 
-<script>
-    const naipes = ['♥', '♦', '♣', '♠'], valores = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
-    const pesos = {'A':1,'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':10,'Q':10,'K':10};
-    let mao = [], selecionadas = [], lixo = [], jaComprou = false;
+        <div class="player-block pos-dir">
+            <div class="avatar">🤖</div>
+            <div class="nome">Bot 3</div>
+            <div class="jogos-tapete" id="jogos-bot3"></div>
+        </div>
 
-    function renderMao() {
-        const container = document.getElementById('minha-mao');
-        container.innerHTML = '';
-        let soma = 0;
-        mao.forEach((c, i) => {
-            const div = document.createElement('div');
-            div.className = `carta carta-mao n-${c.n} ${selecionadas.includes(i) ? 'selecionada' : ''}`;
-            div.innerHTML = `<span>${c.v}</span><span>${c.n}</span>`;
-            div.onclick = () => {
-                if (selecionadas.includes(i)) selecionadas = selecionadas.filter(idx => idx !== i);
-                else selecionadas.push(i);
-                renderMao();
-            };
-            container.appendChild(div);
-            soma += pesos[c.v];
-        });
-        document.getElementById('soma').innerText = soma;
-    }
-
-    function comprarMonte() {
-        if (jaComprou) { alert("Você já comprou nesta rodada! Descarte uma carta no lixo."); return; }
-        mao.push({ v: valores[Math.floor(Math.random()*13)], n: naipes[Math.floor(Math.random()*4)] });
-        jaComprou = true;
-        document.getElementById('msg').innerText = "SELECIONE UMA CARTA PARA DESCARTAR NO LIXO";
-        renderMao();
-    }
-
-    function comprarLixo() {
-        if (jaComprou) {
-            // Se já comprou, clicar no lixo serve para DESCARTAR a selecionada
-            if (selecionadas.length !== 1) { alert("Selecione apenas 1 carta para descartar!"); return; }
-            const desc = mao.splice(selecionadas[0], 1)[0];
-            lixo.push(desc);
-            const lixoBtn = document.getElementById('lixo');
-            lixoBtn.innerHTML = `<span>${desc.v}</span><span>${desc.n}</span>`;
-            lixoBtn.style.background = "white"; lixoBtn.style.color = "black";
-            lixoBtn.className = `slot n-${desc.n}`;
-            selecionadas = []; jaComprou = false;
-            document.getElementById('msg').innerText = "SUA VEZ - COMPRE UMA CARTA";
-            renderMao();
-        } else {
-            if (lixo.length === 0) return;
-            mao.push(lixo.pop());
-            jaComprou = true;
-            document.getElementById('lixo').innerHTML = "LIXO";
-            document.getElementById('lixo').style.background = "";
-            renderMao();
-        }
-    }
-
-    // Inicialização
-    for(let i=0; i<9; i++) mao.push({ v: valores[Math.floor(Math.random()*13)], n: naipes[Math.floor(Math.random()*4)] });
-    renderMao();
-</script>
-</body>
-</html>
+        <div class="
+            
